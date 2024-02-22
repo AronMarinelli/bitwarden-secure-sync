@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bitwarden.SecureSync.Application", "Bitwarden.SecureSync.Application\Bitwarden.SecureSync.Application.csproj", "{54443914-F850-44E6-AF83-AF7D24573335}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bitwarden.SecureSync.Logic", "Bitwarden.SecureSync.Logic\Bitwarden.SecureSync.Logic.csproj", "{5EBB3859-5D7B-4D3A-A88F-6B550D5434CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bitwarden.SecureSync.Interfaces", "Bitwarden.SecureSync.Interfaces\Bitwarden.SecureSync.Interfaces.csproj", "{41514B54-5384-40C2-8335-5C4230CD6309}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54443914-F850-44E6-AF83-AF7D24573335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54443914-F850-44E6-AF83-AF7D24573335}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54443914-F850-44E6-AF83-AF7D24573335}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54443914-F850-44E6-AF83-AF7D24573335}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EBB3859-5D7B-4D3A-A88F-6B550D5434CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EBB3859-5D7B-4D3A-A88F-6B550D5434CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EBB3859-5D7B-4D3A-A88F-6B550D5434CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EBB3859-5D7B-4D3A-A88F-6B550D5434CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41514B54-5384-40C2-8335-5C4230CD6309}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41514B54-5384-40C2-8335-5C4230CD6309}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41514B54-5384-40C2-8335-5C4230CD6309}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41514B54-5384-40C2-8335-5C4230CD6309}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
