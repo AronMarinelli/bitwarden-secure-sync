@@ -1,7 +1,8 @@
-using Bitwarden.SecureSync.Interfaces;
+using Bitwarden.SecureSync.Interfaces.Client;
+using Bitwarden.SecureSync.Interfaces.Synchronisation;
 using Bitwarden.SecureSync.Models.Configuration;
 
-namespace Bitwarden.SecureSync.Logic;
+namespace Bitwarden.SecureSync.Logic.Synchronisation;
 
 public class SynchronisationLogic : ISynchronisationLogic
 {

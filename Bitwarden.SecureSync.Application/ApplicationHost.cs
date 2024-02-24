@@ -1,5 +1,5 @@
-using Bitwarden.SecureSync.Interfaces;
-using Bitwarden.SecureSync.Models;
+using Bitwarden.SecureSync.Interfaces.Client;
+using Bitwarden.SecureSync.Interfaces.Synchronisation;
 using Bitwarden.SecureSync.Models.Configuration;
 using Microsoft.Extensions.Hosting;
 using NCrontab;

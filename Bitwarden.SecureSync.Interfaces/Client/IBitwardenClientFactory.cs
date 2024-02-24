@@ -1,4 +1,4 @@
-namespace Bitwarden.SecureSync.Interfaces;
+namespace Bitwarden.SecureSync.Interfaces.Client;
 
 public interface IBitwardenClientFactory
 {

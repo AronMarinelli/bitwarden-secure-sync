@@ -1,46 +1,24 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Bitwarden.SecureSync.Interfaces;
-using Bitwarden.SecureSync.Models;
+using Bitwarden.SecureSync.Interfaces.Client;
 using Bitwarden.SecureSync.Models.Cli;
 using Bitwarden.SecureSync.Models.Configuration;
 
-namespace Bitwarden.SecureSync.Logic;
+namespace Bitwarden.SecureSync.Logic.Client;
 
 public class BitwardenClient : IBitwardenClient
 {
     private readonly BitwardenConfiguration _configuration;
     private readonly FileInfo _clientFile;
 
-    private readonly HashSet<string> _clientOutput = new();
-    
     private string _sessionKey;
 
     public BitwardenClient(BitwardenConfiguration configuration)
     {
         _configuration = configuration;
 
-        var clientDirectory = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "client"));
-        if (!clientDirectory.Exists)
-            throw new DirectoryNotFoundException("Client directory not found.");
-
-        FileInfo clientFile;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            clientFile = new FileInfo(Path.Combine(clientDirectory.FullName, "bw"));
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            clientFile = new FileInfo(Path.Combine(clientDirectory.FullName, "bw.exe"));
-        }
-        else
-        {
-            throw new PlatformNotSupportedException("Unsupported platform.");
-        }
-
+        var clientFile = BitwardenClientHelper.GetClientFileInfo();
         if (!clientFile.Exists)
             throw new FileNotFoundException("Client not found.");
 

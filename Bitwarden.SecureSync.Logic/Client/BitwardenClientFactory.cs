@@ -1,8 +1,7 @@
-using Bitwarden.SecureSync.Interfaces;
-using Bitwarden.SecureSync.Models;
+using Bitwarden.SecureSync.Interfaces.Client;
 using Bitwarden.SecureSync.Models.Configuration;
 
-namespace Bitwarden.SecureSync.Logic;
+namespace Bitwarden.SecureSync.Logic.Client;
 
 public class BitwardenClientFactory(BitwardenConfiguration configuration) : IBitwardenClientFactory
 {

@@ -1,7 +1,8 @@
 ﻿using Bitwarden.SecureSync.Application;
-using Bitwarden.SecureSync.Interfaces;
-using Bitwarden.SecureSync.Logic;
-using Bitwarden.SecureSync.Models;
+using Bitwarden.SecureSync.Interfaces.Client;
+using Bitwarden.SecureSync.Interfaces.Synchronisation;
+using Bitwarden.SecureSync.Logic.Client;
+using Bitwarden.SecureSync.Logic.Synchronisation;
 using Bitwarden.SecureSync.Models.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
