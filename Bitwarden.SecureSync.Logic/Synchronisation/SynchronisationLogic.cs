@@ -8,17 +8,14 @@ public class SynchronisationLogic : ISynchronisationLogic
 {
     private readonly IBitwardenClientFactory _bitwardenClientFactory;
     private readonly SyncConfiguration _syncConfiguration;
-    private readonly DirectoryInfo _syncDirectory;
+    private readonly DirectoryInfo _dataDirectory;
     
     public SynchronisationLogic(IBitwardenClientFactory bitwardenClientFactory, SyncConfiguration syncConfiguration)
     {
         _bitwardenClientFactory = bitwardenClientFactory;
         _syncConfiguration = syncConfiguration;
         
-        var syncDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "data");
-        Directory.CreateDirectory(syncDirectoryPath);
-        
-        _syncDirectory = new DirectoryInfo(syncDirectoryPath);
+        _dataDirectory = new DirectoryInfo(syncConfiguration.DataDirectory);
     }
     
     public async Task RunSynchronisationAsync(CancellationToken cancellationToken = default)
@@ -26,7 +23,7 @@ public class SynchronisationLogic : ISynchronisationLogic
         using var client = _bitwardenClientFactory.CreateClient();
         await client.UnlockVault(cancellationToken);
         
-        var currentRunDirectory = Path.Combine(_syncDirectory.FullName, DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss"));
+        var currentRunDirectory = Path.Combine(_dataDirectory.FullName, DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss"));
         Directory.CreateDirectory(currentRunDirectory);
         
         await client.ExportVault(
@@ -38,7 +35,7 @@ public class SynchronisationLogic : ISynchronisationLogic
         
         if (_syncConfiguration.FileRetention.HasValue)
         {
-            var directories = _syncDirectory
+            var directories = _dataDirectory
                 .GetDirectories()
                 .OrderByDescending(d => d.Name)
                 .Skip(_syncConfiguration.FileRetention.Value)

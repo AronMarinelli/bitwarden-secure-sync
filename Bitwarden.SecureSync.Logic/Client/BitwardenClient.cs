@@ -80,10 +80,20 @@ public class BitwardenClient : IBitwardenClient
         {
             Console.WriteLine("Using account encryption key for export.");
         }
-        
-        Console.WriteLine("Exporting vault data...");
-        await ExecuteCommandAsync(baseExportCommand + $" --output \"{Path.Combine(exportDirectory, defaultFilename)}\"", cancellationToken);
-        
+
+        try
+        {
+            Console.WriteLine("Exporting vault data...");
+
+            var exportPath = Path.Combine(exportDirectory, defaultFilename);
+            await ExecuteCommandAsync(baseExportCommand + $" --output \"{exportPath}\"", cancellationToken);
+            Console.WriteLine($"Successfully exported personal vault to {exportPath}.");
+        }
+        catch
+        {
+            Console.WriteLine($"An error occurred while exporting personal vault data, skipping...");
+        }
+
         if (includeOrganisationItems)
         {
             Console.WriteLine("Listing organisations for export...");
@@ -106,6 +116,7 @@ public class BitwardenClient : IBitwardenClient
                             baseExportCommand + $" --organizationid {organisation.Id} --output \"{outputFile}\"",
                             cancellationToken
                         );
+                        Console.WriteLine($"Successfully exported organisation vault data to {outputFile}.");
                     }
                     catch
                     {

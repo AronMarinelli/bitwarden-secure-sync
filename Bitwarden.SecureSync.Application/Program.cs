@@ -7,16 +7,27 @@ using Bitwarden.SecureSync.Models.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
-Console.WriteLine("Starting Bitwarden Secure Sync tool...");
+using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+builder.Services.AddLogging(
+    loggingBuilder =>
+    {
+        loggingBuilder.AddFilter("Microsoft", LogLevel.Warning)
+            .AddFilter("System", LogLevel.Warning)
+            .AddConsole();
+    });
+
+Console.WriteLine("Starting Bitwarden Secure Sync tool...");
 
 var configurationRoot = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional:true, reloadOnChange:true)  
     .AddEnvironmentVariables(prefix: "BWSYNC_")           
     .Build();
+
+configurationRoot["Logging:LogLevel:Microsoft"] = "None";
 
 InjectConfiguration(builder.Services, configurationRoot);
 
