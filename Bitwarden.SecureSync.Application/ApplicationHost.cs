@@ -3,6 +3,7 @@ using Bitwarden.SecureSync.Interfaces.Synchronisation;
 using Bitwarden.SecureSync.Models.Configuration;
 using Microsoft.Extensions.Hosting;
 using NCrontab;
+using Timer = System.Timers.Timer;
 
 namespace Bitwarden.SecureSync.Application;
 
@@ -13,7 +14,8 @@ public class ApplicationHost(
     SyncConfiguration syncConfiguration
 ) : IHostedService
 {
-    private CrontabSchedule? _schedule;
+    private CrontabSchedule _schedule;
+    private Timer _timer;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -28,12 +30,10 @@ public class ApplicationHost(
 
     private void OnStarted()
     {
-        var now = DateTime.Now;
         _schedule = CrontabSchedule.TryParse(syncConfiguration.CronSchedule);
-        if (_schedule is null || _schedule.GetNextOccurrences(now, now.AddSeconds(5 * 60 - 1)).Count() > 1)
+        if (_schedule is null)
         {
-            Console.WriteLine(
-                "Invalid cron schedule defined in configuration. Using default schedule (daily at 00:00).");
+            Console.WriteLine("Invalid CRON schedule defined in configuration. Using default schedule (daily at 00:00).");
             _schedule = CrontabSchedule.Parse("0 0 * * *");
         }
 
@@ -47,12 +47,44 @@ public class ApplicationHost(
         {
             Console.WriteLine("Starting initial Bitwarden sync...");
             RunBitwardenSync(hostApplicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
+            ScheduleJob(hostApplicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
         }
         else
         {
-            DelayUntilNextRun(hostApplicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
-            RunBitwardenSync(hostApplicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
+            ScheduleJob(hostApplicationLifetime.ApplicationStopping).GetAwaiter().GetResult();
         }
+    }
+
+    private async Task ScheduleJob(CancellationToken cancellationToken)
+    {
+        var next = _schedule!.GetNextOccurrence(DateTime.Now);
+        var delay = next - DateTimeOffset.Now;
+        if (delay.TotalMilliseconds <= 0)
+        {
+            await ScheduleJob(cancellationToken);
+            return;
+        }
+
+        Console.WriteLine($"Next sync scheduled for {next:yyyy-MM-dd HH:mm:ss}.");
+
+        _timer = new Timer(delay.TotalMilliseconds);
+        _timer.Elapsed += async (_, _) =>
+        {
+            _timer.Dispose();
+            _timer = null;
+
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                await RunBitwardenSync(cancellationToken);
+            }
+
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                await ScheduleJob(cancellationToken);
+            }
+        };
+
+        _timer.Start();
     }
 
     private async Task RunBitwardenSync(CancellationToken cancellationToken = default)
@@ -63,30 +95,17 @@ public class ApplicationHost(
         }
         catch (Exception e)
         {
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - An error occurred during Bitwarden sync: {e.Message}");
+            Console.WriteLine(
+                $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - An error occurred during Bitwarden sync: {e.Message}");
         }
-
-        await DelayUntilNextRun(cancellationToken);
-    }
-
-    private async Task DelayUntilNextRun(CancellationToken cancellationToken = default)
-    {
-        var now = DateTime.Now;
-        var nextOccurrence = _schedule!.GetNextOccurrence(now);
-
-        var delay = nextOccurrence - now;
-        if (delay.TotalMilliseconds < 0)
-        {
-            delay = TimeSpan.Zero;
-        }
-
-        Console.WriteLine($"Next sync scheduled for {nextOccurrence:yyyy-MM-dd HH:mm:ss}.");
-        await Task.Delay(delay, cancellationToken);
     }
 
     private void OnStopping()
     {
         Console.WriteLine("Stopping Bitwarden Secure Sync tool...");
+
+        _timer?.Stop();
+        _timer?.Dispose();
     }
 
     private static void OnStopped()

@@ -26,6 +26,9 @@ public class BitwardenClient : IBitwardenClient
         
         // Ensure the client is logged out.
         ExecuteCommandAsync("logout", throwOnError: false).GetAwaiter().GetResult();
+
+        Console.WriteLine($"Connecting to {configuration.ServerUrl}...");
+        ExecuteCommandAsync($"config server {configuration.ServerUrl}").GetAwaiter().GetResult();
     }
 
     public async Task UnlockVault(CancellationToken cancellationToken = default)
@@ -68,18 +71,14 @@ public class BitwardenClient : IBitwardenClient
         const string defaultFilename = "personal_vault.encrypted.json";
         
         var baseExportCommand = $"export --format encrypted_json --session {_sessionKey}";
-        switch (string.IsNullOrWhiteSpace(encryptionKey))
+        if (!string.IsNullOrWhiteSpace(encryptionKey))
         {
-            case false when encryptionKey.Length >= 8:
-                Console.WriteLine("Using custom encryption key for export.");
-                baseExportCommand += $" --password {encryptionKey}";
-                break;
-            case false when encryptionKey.Length < 8:
-                Console.WriteLine("Custom encryption key is too short. Using account encryption key for export.");
-                break;
-            default:
-                Console.WriteLine("Using account encryption key for export.");
-                break;
+            Console.WriteLine("Using custom encryption key for export.");
+            baseExportCommand += $" --password {encryptionKey}";
+        }
+        else
+        {
+            Console.WriteLine("Using account encryption key for export.");
         }
         
         Console.WriteLine("Exporting vault data...");
@@ -152,9 +151,9 @@ public class BitwardenClient : IBitwardenClient
 
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
-
         _sessionKey = null;
-        ExecuteCommandAsync("logout").GetAwaiter().GetResult();
+        ExecuteCommandAsync("logout", throwOnError: false).GetAwaiter().GetResult();
+        
+        GC.SuppressFinalize(this);
     }
 }

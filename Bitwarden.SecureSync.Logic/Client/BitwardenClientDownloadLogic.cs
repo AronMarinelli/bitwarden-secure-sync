@@ -61,33 +61,31 @@ public class BitwardenClientDownloadLogic : IBitwardenClientDownloadLogic
         {
             Console.WriteLine("Bitwarden CLI client not found. Downloading...");
             await DownloadClient(downloadUrl, cancellationToken);
-            return;
         }
-
-        try
+        else
         {
-            Console.WriteLine("Bitwarden CLI client found, checking version...");
-            var version = await File.ReadAllTextAsync(_clientVersionFile.FullName, cancellationToken);
-            if (version != ClientVersion)
+            try
             {
-                Console.WriteLine("Bitwarden CLI client version outdated. Downloading...");
+                Console.WriteLine("Bitwarden CLI client found, checking version...");
+                var version = await File.ReadAllTextAsync(_clientVersionFile.FullName, cancellationToken);
+                if (version != ClientVersion)
+                {
+                    Console.WriteLine("Bitwarden CLI client version outdated. Downloading...");
+                    await DownloadClient(downloadUrl, cancellationToken);
+                }
+                else
+                {
+                    Console.WriteLine("Up-to-date Bitwarden CLI client installation found. Skipping download.");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Version file missing or corrupt. Downloading client...");
                 await DownloadClient(downloadUrl, cancellationToken);
             }
-            else
-            {
-                Console.WriteLine("Up-to-date Bitwarden CLI client installation found. Skipping download.");
-            }
         }
-        catch
-        {
-            Console.WriteLine("Version file missing or corrupt. Downloading client...");
-            await DownloadClient(downloadUrl, cancellationToken);
-        }
-    }
 
-    private async Task EnsureLinuxClientAvailability(CancellationToken cancellationToken = default)
-    {
-        
+        SetUnixFilePermissions();
     }
 
     private async Task DownloadClient(string url, CancellationToken cancellationToken = default)
@@ -117,5 +115,14 @@ public class BitwardenClientDownloadLogic : IBitwardenClientDownloadLogic
         zipFile.Delete();
         await File.WriteAllTextAsync(_clientVersionFile.FullName, ClientVersion, cancellationToken);
         Console.WriteLine($"Bitwarden CLI client {ClientVersion} downloaded successfully.");
+    }
+
+    private void SetUnixFilePermissions()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            return;
+
+        Console.WriteLine($"Ensuring required permissions are set on CLI client file...");
+        _clientFile.UnixFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
     }
 }

@@ -31,7 +31,7 @@ public class SynchronisationLogic : ISynchronisationLogic
         
         await client.ExportVault(
             currentRunDirectory,
-            _syncConfiguration.EncryptUsingPassword ? _syncConfiguration.EncryptionKey : null,
+            _syncConfiguration.EncryptUsingCustomKey ? _syncConfiguration.EncryptionKey : null,
             _syncConfiguration.IncludeOrganisationItems,
             cancellationToken
         );
@@ -45,7 +45,7 @@ public class SynchronisationLogic : ISynchronisationLogic
                 .ToList();
 
             if (directories.Count != 0)
-                Console.WriteLine($"Deleting {directories.Count} directories to meet retention policy (max. {_syncConfiguration.FileRetention}).");
+                Console.WriteLine($"Deleting {directories.Count} {(directories.Count == 1 ? "directory" : "directories")} to meet retention policy (max. {_syncConfiguration.FileRetention}).");
             
             foreach (var directory in directories)
             {
