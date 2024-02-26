@@ -26,17 +26,14 @@ public class ApplicationHost(
         return Task.CompletedTask;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
 
     private void OnStarted()
     {
-        _schedule = CrontabSchedule.TryParse(syncConfiguration.CronSchedule);
-        if (_schedule is null)
-        {
-            Console.WriteLine("Invalid CRON schedule defined in configuration. Using default schedule (daily at 00:00).");
-            _schedule = CrontabSchedule.Parse("0 0 * * *");
-        }
-
+        _schedule = syncConfiguration.GetCronSchedule();
         Console.WriteLine($"Cron schedule: {syncConfiguration.CronSchedule}");
 
         clientDownloadLogic.EnsureClientAvailabilityAsync(hostApplicationLifetime.ApplicationStopping).GetAwaiter()
@@ -73,15 +70,9 @@ public class ApplicationHost(
             _timer.Dispose();
             _timer = null;
 
-            if (!cancellationToken.IsCancellationRequested)
-            {
-                await RunBitwardenSync(cancellationToken);
-            }
+            if (!cancellationToken.IsCancellationRequested) await RunBitwardenSync(cancellationToken);
 
-            if (!cancellationToken.IsCancellationRequested)
-            {
-                await ScheduleJob(cancellationToken);
-            }
+            if (!cancellationToken.IsCancellationRequested) await ScheduleJob(cancellationToken);
         };
 
         _timer.Start();

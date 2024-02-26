@@ -6,22 +6,21 @@ namespace Bitwarden.SecureSync.Logic.Client;
 
 public class BitwardenClientDownloadLogic : IBitwardenClientDownloadLogic
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private const string CLIENT_VERSION = "v2024.2.0";
 
-    private readonly DirectoryInfo _clientDownloadDirectory;
-    private readonly FileInfo _clientVersionFile;
-    private readonly FileInfo _clientFile;
-
-    private const string ClientVersion = "v2024.2.0";
-
-    private const string WindowsClientUrl =
+    private const string WINDOWS_CLIENT_URL =
         "https://github.com/bitwarden/clients/releases/download/cli-v2024.2.0/bw-windows-2024.2.0.zip";
 
-    private const string LinuxClientUrl =
+    private const string LINUX_CLIENT_URL =
         "https://github.com/bitwarden/clients/releases/download/cli-v2024.2.0/bw-linux-2024.2.0.zip";
 
-    private const string OsxClientUrl =
+    private const string OSX_CLIENT_URL =
         "https://github.com/bitwarden/clients/releases/download/cli-v2024.2.0/bw-macos-2024.2.0.zip";
+
+    private readonly DirectoryInfo _clientDownloadDirectory;
+    private readonly FileInfo _clientFile;
+    private readonly FileInfo _clientVersionFile;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public BitwardenClientDownloadLogic(IHttpClientFactory httpClientFactory)
     {
@@ -38,24 +37,16 @@ public class BitwardenClientDownloadLogic : IBitwardenClientDownloadLogic
     public async Task EnsureClientAvailabilityAsync(CancellationToken cancellationToken = default)
     {
         string downloadUrl;
-        
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            downloadUrl = LinuxClientUrl;
-        }
+            downloadUrl = LINUX_CLIENT_URL;
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            downloadUrl = WindowsClientUrl;
-        } 
+            downloadUrl = WINDOWS_CLIENT_URL;
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            downloadUrl = OsxClientUrl;
-        }
+            downloadUrl = OSX_CLIENT_URL;
         else
-        {
             throw new PlatformNotSupportedException("Unsupported platform.");
-        }
-        
+
         Console.WriteLine("Checking for Bitwarden CLI client...");
         if (!_clientFile.Exists)
         {
@@ -68,7 +59,7 @@ public class BitwardenClientDownloadLogic : IBitwardenClientDownloadLogic
             {
                 Console.WriteLine("Bitwarden CLI client found, checking version...");
                 var version = await File.ReadAllTextAsync(_clientVersionFile.FullName, cancellationToken);
-                if (version != ClientVersion)
+                if (version != CLIENT_VERSION)
                 {
                     Console.WriteLine("Bitwarden CLI client version outdated. Downloading...");
                     await DownloadClient(downloadUrl, cancellationToken);
@@ -90,7 +81,8 @@ public class BitwardenClientDownloadLogic : IBitwardenClientDownloadLogic
 
     private async Task DownloadClient(string url, CancellationToken cancellationToken = default)
     {
-        var zipFile = new FileInfo(Path.Combine(_clientDownloadDirectory.FullName, $"{DateTime.Now:yyyyMMdd_HHmmss}-bw.zip"));
+        var zipFile =
+            new FileInfo(Path.Combine(_clientDownloadDirectory.FullName, $"{DateTime.Now:yyyyMMdd_HHmmss}-bw.zip"));
         using (var httpClient = _httpClientFactory.CreateClient())
         {
             var response = await httpClient.GetAsync(url, cancellationToken);
@@ -113,8 +105,8 @@ public class BitwardenClientDownloadLogic : IBitwardenClientDownloadLogic
         }
 
         zipFile.Delete();
-        await File.WriteAllTextAsync(_clientVersionFile.FullName, ClientVersion, cancellationToken);
-        Console.WriteLine($"Bitwarden CLI client {ClientVersion} downloaded successfully.");
+        await File.WriteAllTextAsync(_clientVersionFile.FullName, CLIENT_VERSION, cancellationToken);
+        Console.WriteLine($"Bitwarden CLI client {CLIENT_VERSION} downloaded successfully.");
     }
 
     private void SetUnixFilePermissions()
@@ -122,7 +114,7 @@ public class BitwardenClientDownloadLogic : IBitwardenClientDownloadLogic
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return;
 
-        Console.WriteLine($"Ensuring required permissions are set on CLI client file...");
+        Console.WriteLine("Ensuring required permissions are set on CLI client file...");
         _clientFile.UnixFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
     }
 }

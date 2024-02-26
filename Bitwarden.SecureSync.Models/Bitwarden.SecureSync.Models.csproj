@@ -6,4 +6,8 @@
         <Nullable>disable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <PackageReference Include="NCrontab.Signed" Version="3.3.3"/>
+    </ItemGroup>
+
 </Project>

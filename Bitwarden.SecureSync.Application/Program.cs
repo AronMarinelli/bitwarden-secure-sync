@@ -1,4 +1,5 @@
-﻿using Bitwarden.SecureSync.Application;
+﻿using System.Text.Json;
+using Bitwarden.SecureSync.Application;
 using Bitwarden.SecureSync.Interfaces.Client;
 using Bitwarden.SecureSync.Interfaces.Synchronisation;
 using Bitwarden.SecureSync.Logic.Client;
@@ -22,13 +23,15 @@ using Microsoft.Extensions.Logging;
 
     Console.WriteLine("Starting Bitwarden Secure Sync tool...");
 
+    await CheckConfigurationAvailability();
+
     var configurationRoot = new ConfigurationBuilder()
         .SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-        .AddEnvironmentVariables(prefix: "BWSYNC:")
+        .AddJsonFile("appsettings.json", true, true)
+        .AddJsonFile("config/appsettings.json", true, true)
         .Build();
 
-    InjectConfiguration(builder.Services, configurationRoot);
+    BindConfiguration(builder.Services, configurationRoot);
 
     builder.Services.AddHttpClient();
 
@@ -45,11 +48,39 @@ using Microsoft.Extensions.Logging;
 }
 return;
 
-static void InjectConfiguration(IServiceCollection services, IConfiguration configuration)
+static async Task CheckConfigurationAvailability()
+{
+    if (File.Exists("appsettings.json") || File.Exists("config/appsettings.json"))
+        return;
+
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine(
+        "No configuration file found. A default appsettings.json file will be created in the /config directory.");
+    Console.ResetColor();
+
+    var bitwardenConfiguration = BitwardenConfiguration.GetSampleConfiguration();
+    var syncConfiguration = SyncConfiguration.GetSampleConfiguration();
+
+    var serializedSampleConfig = JsonSerializer.Serialize(
+        new
+        {
+            Bitwarden = bitwardenConfiguration,
+            Sync = syncConfiguration
+        },
+        new JsonSerializerOptions
+        {
+            WriteIndented = true
+        }
+    );
+
+    await File.WriteAllTextAsync("config/appsettings.json", serializedSampleConfig);
+}
+
+static void BindConfiguration(IServiceCollection services, IConfiguration configuration)
 {
     var bitwardenConfiguration = new BitwardenConfiguration();
     var syncConfiguration = new SyncConfiguration();
-    
+
     configuration.GetSection("Bitwarden").Bind(bitwardenConfiguration);
     configuration.GetSection("Sync").Bind(syncConfiguration);
 
