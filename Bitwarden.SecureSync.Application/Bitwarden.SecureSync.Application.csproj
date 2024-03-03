@@ -33,6 +33,10 @@
         <Content Include="..\.dockerignore">
             <Link>.dockerignore</Link>
         </Content>
+        <Content Include="..\docker-entrypoint.sh">
+          <Link>docker-entrypoint.sh</Link>
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
         <Content Include="..\Dockerfile">
             <Link>Dockerfile</Link>
         </Content>

@@ -1,5 +1,4 @@
 ﻿FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
-USER $APP_UID
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -20,14 +19,21 @@ RUN dotnet publish "Bitwarden.SecureSync.Application.csproj" -c $BUILD_CONFIGURA
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Bitwarden.SecureSync.Application.dll"]
+
+ENV PATH="/app:${PATH}" \
+    PUID=0 \
+    PGID=0
+
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y gosu; \
+	rm -rf /var/lib/apt/lists/*; \
+	gosu nobody true
 
 VOLUME ["/app/config", "/app/data"]
 
-USER root
-RUN chown -R $APP_UID /app
-USER $APP_UID
+COPY --from=publish /app/publish .
+ENTRYPOINT ["/bin/sh", "docker-entrypoint.sh"]
 
 LABEL org.opencontainers.image.authors="aron@marinelli.nl"
 LABEL org.opencontainers.image.url="https://github.com/AronMarinelli/bitwarden-secure-sync"
