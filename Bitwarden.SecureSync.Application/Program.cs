@@ -56,7 +56,6 @@ static async Task CheckConfigurationAvailability()
     Console.ForegroundColor = ConsoleColor.Yellow;
     Console.WriteLine(
         "No configuration file found. A default appsettings.json file will be created in the /config directory.");
-    Console.ResetColor();
 
     var bitwardenConfiguration = BitwardenConfiguration.GetSampleConfiguration();
     var syncConfiguration = SyncConfiguration.GetSampleConfiguration();
@@ -73,7 +72,13 @@ static async Task CheckConfigurationAvailability()
         }
     );
 
-    await File.WriteAllTextAsync("config/appsettings.json", serializedSampleConfig);
+    var fileInfo = new FileInfo("config/appsettings.json");
+    await using var fs = fileInfo.Open(FileMode.CreateNew, FileAccess.ReadWrite);
+    await using var sw = new StreamWriter(fs);
+    await sw.WriteAsync(serializedSampleConfig);
+    
+    Console.WriteLine($"Stopping application gracefully. Please add required configuration to {fileInfo.FullName} in order for the application to run properly on next run.");
+    Environment.Exit(0);
 }
 
 static void BindConfiguration(IServiceCollection services, IConfiguration configuration)

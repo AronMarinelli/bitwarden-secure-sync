@@ -4,6 +4,7 @@ A simple tool that can be used to export your Bitwarden vault to a local file pe
 
 Uses the [Bitwarden CLI](https://github.com/bitwarden/clients) tool to communicate with the API, and exports your passwords using the default Bitwarden export method.
 
+> [!NOTE]  
 > I am not affiliated with Bitwarden Inc. in any way, and am providing this software as-is. This project is intended for personal use, and might receive breaking updates without notice. 
 
 ## Usage
@@ -13,6 +14,14 @@ You can find the docker image for this repository here: https://hub.docker.com/r
 It is important to bind both the `/app/config` and `/app/data` directories for the container to function properly. The data directory can be configured through the appsettings.json file, but it is recommended to leave this as-is when running inside of Docker.
 
 Upon initial run, the application shall automatically create an appsettings.json file at the /app/config path. In order for the application to function, the appsettings.json file should be configured as [described below](#configuration).
+
+> [!IMPORTANT]  
+> By default, the application is configured to run as root (UID/GID 0).
+> For security purposes, it is recommended you specify the PGID and PUID environment variables when running the container.
+> 
+> A properly formatted docker run command may look as follows:
+>
+> ```docker run --env PGID=100 --env PUID=99 -v /home/docker/bitwarden-secure-sync/config:/app/config -v /home/docker/bitwarden-secure-sync/data:/app/data aronmarinelli/bitwarden-secure-sync```
 
 ### .NET/Console app
 It is possible to run the application outside of Docker. 
