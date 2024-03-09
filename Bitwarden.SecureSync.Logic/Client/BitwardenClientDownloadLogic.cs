@@ -6,16 +6,16 @@ namespace Bitwarden.SecureSync.Logic.Client;
 
 public class BitwardenClientDownloadLogic : IBitwardenClientDownloadLogic
 {
-    private const string CLIENT_VERSION = "v2024.2.0";
+    private const string CLIENT_VERSION = "v2024.2.1";
 
     private const string WINDOWS_CLIENT_URL =
-        "https://github.com/bitwarden/clients/releases/download/cli-v2024.2.0/bw-windows-2024.2.0.zip";
+        "https://github.com/bitwarden/clients/releases/download/cli-v2024.2.1/bw-windows-2024.2.1.zip";
 
     private const string LINUX_CLIENT_URL =
-        "https://github.com/bitwarden/clients/releases/download/cli-v2024.2.0/bw-linux-2024.2.0.zip";
+        "https://github.com/bitwarden/clients/releases/download/cli-v2024.2.1/bw-linux-2024.2.1.zip";
 
     private const string OSX_CLIENT_URL =
-        "https://github.com/bitwarden/clients/releases/download/cli-v2024.2.0/bw-macos-2024.2.0.zip";
+        "https://github.com/bitwarden/clients/releases/download/cli-v2024.2.1/bw-macos-2024.2.1.zip";
 
     private readonly DirectoryInfo _clientDownloadDirectory;
     private readonly FileInfo _clientFile;
