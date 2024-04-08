@@ -73,11 +73,17 @@ static async Task CheckConfigurationAvailability()
     );
 
     var fileInfo = new FileInfo("config/appsettings.json");
-    await using var fs = fileInfo.Open(FileMode.CreateNew, FileAccess.ReadWrite);
-    await using var sw = new StreamWriter(fs);
-    await sw.WriteAsync(serializedSampleConfig);
-    
-    Console.WriteLine($"Stopping application gracefully. Please add required configuration to {fileInfo.FullName} in order for the application to run properly on next run.");
+    if (fileInfo.Directory != null && !fileInfo.Directory.Exists)
+        Directory.CreateDirectory(fileInfo.Directory.FullName);
+
+    await using (var fs = fileInfo.Open(FileMode.CreateNew, FileAccess.ReadWrite))
+    await using (var sw = new StreamWriter(fs))
+    {
+        await sw.WriteAsync(serializedSampleConfig);
+    }
+
+    Console.WriteLine(
+        $"Stopping application gracefully. Please add required configuration to {fileInfo.FullName} in order for the application to run properly on next run.");
     Environment.Exit(0);
 }
 
