@@ -24,7 +24,7 @@ public class SynchronisationLogic : ISynchronisationLogic
         await client.UnlockVault(cancellationToken);
 
         var currentRunDirectory =
-            Path.Combine(_dataDirectory.FullName, DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss"));
+            Path.Combine(_dataDirectory.FullName, DateTimeOffset.Now.ToString("yyyy-MM-ddTHH-mm-ss"));
         Directory.CreateDirectory(currentRunDirectory);
 
         await client.ExportVault(
