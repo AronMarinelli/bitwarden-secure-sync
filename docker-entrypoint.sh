@@ -1,9 +1,7 @@
-#!/bin/sh
-
-mkdir /.cache && chmod -R 777 /.cache
+mkdir -p /.cache && chmod -R 777 /.cache
 chown -R ${PUID}:${PGID} /.cache
 
-mkdir /.config && mkdir /.config/Bitwarden\ CLI
+mkdir -p /.config && mkdir -p /.config/Bitwarden\ CLI
 chown -R ${PUID}:${PGID} /.config/Bitwarden\ CLI
 
 chown -R ${PUID}:${PGID} /app
